@@ -34,11 +34,26 @@ Qualification is governed by three standard operating procedures in [`SOP/`](SOP
 
 ```
 SOP/                    Qualification procedures (SOP 01 to 03)
-pipeline/               Python modules for discovery, filtering, harvesting and Sheets I/O
+pipeline/               Python modules: discovery, crawling, filtering, harvesting, key checks, Sheets I/O
+docs/SETUP_AND_RUN_PROMPT.md   Prompt for an operator: setup, key rolling, Apify limits, duplicates, edge cases
+docs/prompts/           One prompt per stage (companies, people, validation, sheet writes) plus a cycle overview
 docs/agent_playbooks/   Review prompts for company and person verification
 .env.example            Required configuration (names only, no values)
 requirements.txt        Python dependencies
 ```
+
+Modules in `pipeline/`:
+
+| Module | Purpose |
+|---|---|
+| `common.py` | Shared helpers: approved countries, role filters, Sheets I/O, Apify runner, de-duplication |
+| `check_keys.py` | Live balance check of every Apify/Tavily key; writes the usable pool |
+| `maps_harvest.py` | Google Maps company discovery with AI-worded, local-language searches |
+| `build_universe.py` | Merges harvests into one entry per company domain |
+| `company_crawl.py` | Visits each company site and scores generative-AI evidence |
+| `ai_prefilter.py`, `ai_subpage_check.py` | Homepage and inner-page AI-use filters |
+| `lead_harvest.py` | Lead-finder people harvest with key rotation |
+| `tavily_search.py` | Web search with key rotation |
 
 ## Setup
 
@@ -48,6 +63,8 @@ pip install -r requirements.txt
 cp .env.example .env      # then fill in your own values
 set -a && source .env && set +a
 ```
+
+To run the pipeline end to end, give your AI assistant [`docs/SETUP_AND_RUN_PROMPT.md`](docs/SETUP_AND_RUN_PROMPT.md).
 
 Configuration is read from environment variables only (see [`.env.example`](.env.example)). Credentials, API keys, lead exports and working data are deliberately **not** stored in this repository; `data/` is git-ignored.
 
